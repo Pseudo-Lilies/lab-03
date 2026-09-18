@@ -51,6 +51,8 @@ fun CityListScreen(
                 onClick = {
                     showAddCityFields = !showAddCityFields
                     showUpdateCityFields = false
+                    selectedCityName = ""
+                    selectedProvinceName = ""
                 }
             ) {
                 Text("+")
@@ -127,9 +129,17 @@ fun CityListScreen(
         LazyColumn(modifier = Modifier.fillMaxSize()) {
             itemsIndexed(cities) { index, city ->
                 CityRow(city = city) {
-                    selectedCityName = city.name
-                    selectedProvinceName = city.province
-                    showUpdateCityFields = true
+                    if (selectedCityName != city.name) {
+                        selectedCityName = city.name
+                        selectedProvinceName = city.province
+                        showUpdateCityFields = true
+                    }
+                    else {
+                        selectedCityName = ""
+                        selectedProvinceName = ""
+                        showUpdateCityFields = false
+                    }
+                    showAddCityFields = false
                 }
 
                 if (index < cities.lastIndex) {
