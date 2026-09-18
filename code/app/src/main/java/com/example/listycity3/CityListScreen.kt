@@ -25,16 +25,21 @@ import androidx.compose.runtime.setValue
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.clickable
 
 @Composable
 fun CityListScreen(
     cities: List<City>,
     onAddCity: (City) -> Unit,
+    onUpdateCity: (City, City) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var newCityName by remember { mutableStateOf("") }
     var newProvinceName by remember { mutableStateOf("") }
+    var selectedCityName by remember { mutableStateOf("") }
+    var selectedProvinceName by remember { mutableStateOf("") }
     var showAddCityFields by remember { mutableStateOf(false) }
+    var showUpdateCityFields by remember { mutableStateOf(false) }
 
     Column(modifier = modifier.fillMaxSize()) {
         Row(
@@ -45,13 +50,14 @@ fun CityListScreen(
                 modifier = Modifier.padding(16.dp),
                 onClick = {
                     showAddCityFields = !showAddCityFields
+                    showUpdateCityFields = false
                 }
             ) {
                 Text("+")
             }
         }
 
-        if (showAddCityFields) {
+        if (showAddCityFields or showUpdateCityFields) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -79,27 +85,52 @@ fun CityListScreen(
                     modifier = Modifier.padding(vertical = 12.dp),
                     onClick = {
                         if (newCityName.isNotBlank() && newProvinceName.isNotBlank()) {
-                            onAddCity(
-                                City(
-                                    name = newCityName,
-                                    province = newProvinceName
+                            if (showAddCityFields) {
+                                onAddCity(
+                                    City(
+                                        name = newCityName,
+                                        province = newProvinceName
+                                    )
                                 )
-                            )
+                            }
+                            if (showUpdateCityFields) {
+                                onUpdateCity(
+                                    City(
+                                        name = selectedCityName,
+                                        province = selectedProvinceName
+                                    ),
+                                    City(
+                                        name = newCityName,
+                                        province = newProvinceName
+                                    )
+                                )
+                            }
+
                             newCityName = ""
                             newProvinceName = ""
+                            selectedCityName = ""
+                            selectedProvinceName = ""
 
                             showAddCityFields = false
+                            showUpdateCityFields = false
                         }
                     }
                 ) {
-                    Text("Add City")
+                    if (showAddCityFields)
+                        Text("Add City")
+                    else if (showUpdateCityFields)
+                        Text("Update City")
                 }
             }
         }
 
         LazyColumn(modifier = Modifier.fillMaxSize()) {
             itemsIndexed(cities) { index, city ->
-                CityRow(city = city)
+                CityRow(city = city) {
+                    selectedCityName = city.name
+                    selectedProvinceName = city.province
+                    showUpdateCityFields = true
+                }
 
                 if (index < cities.lastIndex) {
                     HorizontalDivider()
@@ -110,11 +141,15 @@ fun CityListScreen(
 }
 
 @Composable
-fun CityRow(city: City) {
+fun CityRow(
+    city: City,
+    selectCity: () -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 20.dp, vertical = 16.dp)
+            .clickable(true, onClick = selectCity)
     ) {
         Text(
             text = city.name,
@@ -140,7 +175,8 @@ fun CityListScreenPreview() {
                 City("Vancouver", "BC"),
                 City("Calgary", "AB")
             ),
-            onAddCity = {}
+            onAddCity = {},
+            onUpdateCity = { a, b -> }
         )
     }
 }

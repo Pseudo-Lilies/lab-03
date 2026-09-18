@@ -16,4 +16,10 @@ class CityRepository {
         _cities.add(city)
     }
 
+    fun updateCity(oldCity: City, newCity: City) {
+        val index = _cities.indexOf(oldCity)
+        if (index != -1) {
+            _cities[index] = newCity
+        }
+    }
 }
